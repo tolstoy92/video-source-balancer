@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      network: host
+    ports:
+      - "8000:8000"
+    environment:
+      - DB__URL=postgresql://postgres:postgres@db:5432/app_db
+      - BALANCING_FACTOR=3
+      - CDN_HOST=cdn.host.ru
+    depends_on:
+      - db
+
+  locust:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.performance
+    depends_on:
+      - app
+    ports:
+      - "8089:8089"
+    command: -f /performance_test/locustfile.py -H http://app:8000
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=app_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,5 @@
+FROM locustio/locust
+
+WORKDIR /performance_test
+
+COPY ./tests/performance/locustfile.py /performance_test/locustfile.py
